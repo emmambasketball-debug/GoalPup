@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GoalPup — Your Goal Coach</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+
+:root{
+  --cream:#FBF7EE;
+  --cream-2:#F4EFE2;
+  --white:#FFFFFF;
+  --sage:#9CB899;
+  --sage-dark:#71906D;
+  --sky:#AAD1E6;
+  --sky-dark:#7FB3CF;
+  --beige:#EADFC4;
+  --gold:#D8AC5C;
+  --forest:#33512F;
+  --forest-deep:#203A20;
+  --ink:#2E2B22;
+  --ink-soft:#6b6656;
+  --line:rgba(51,81,47,0.12);
+  --shadow-sm: 0 2px 10px rgba(46,43,34,0.06);
+  --shadow-md: 0 10px 30px rgba(46,43,34,0.10);
+  --shadow-lg: 0 20px 50px rgba(46,43,34,0.16);
+  --radius-lg: 28px;
+  --radius-md: 18px;
+  --radius-sm: 12px;
+  --font-display:'Fraunces', serif;
+  --font-body:'Plus Jakarta Sans', sans-serif;
+  --font-mono:'Space Mono', monospace;
+}
+
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:var(--font-body);
+  background:
+    radial-gradient(circle at 15% 0%, rgba(170,209,230,0.35), transparent 45%),
+    radial-gradient(circle at 90% 10%, rgba(156,184,153,0.30), transparent 40%),
+    var(--cream);
+  color:var(--ink);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important;}
+}
+h1,h2,h3,.display{font-family:var(--font-display); font-weight:700; letter-spacing:-0.01em;}
+.mono{font-family:var(--font-mono);}
+button{font-family:inherit; cursor:pointer;}
+:focus-visible{outline:3px solid var(--sky-dark); outline-offset:2px;}
+
+#app{max-width:480px; margin:0 auto; min-height:100vh; position:relative; padding-bottom:96px;}
+
+/* ---------- Buttons ---------- */
+.btn{
+  border:none; border-radius:100px; padding:15px 22px; font-weight:700; font-size:15px;
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  transition:transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+}
+.btn:active{transform:scale(0.96);}
+.btn-primary{background:var(--forest); color:var(--cream); box-shadow:var(--shadow-sm);}
+.btn-primary:hover{box-shadow:var(--shadow-md);}
+.btn-primary:disabled{opacity:0.4; cursor:not-allowed;}
+.btn-ghost{background:transparent; color:var(--forest); border:2px solid var(--line);}
+.btn-block{width:100%;}
+.btn-sm{padding:9px 14px; font-size:13px;}
+.btn-gold{background:var(--gold); color:var(--forest-deep);}
+
+/* ---------- Onboarding ---------- */
+.screen{padding:22px 20px 20px;}
+.onb-wrap{min-height:100vh; display:flex; flex-direction:column; justify-content:space-between; padding:28px 24px;}
+.onb-progress{display:flex; gap:6px; margin-bottom:28px;}
+.onb-dot{flex:1; height:5px; border-radius:4px; background:var(--line);}
+.onb-dot.done{background:var(--forest);}
+.onb-body{flex:1; display:flex; flex-direction:column; justify-content:center;}
+.onb-eyebrow{font-family:var(--font-mono); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--sage-dark); margin-bottom:10px;}
+.onb-title{font-size:30px; line-height:1.15; margin:0 0 8px;}
+.onb-sub{color:var(--ink-soft); font-size:15px; margin:0 0 26px; line-height:1.5;}
+.field{width:100%; padding:16px 18px; border-radius:var(--radius-sm); border:2px solid var(--line); background:var(--white); font-size:16px; font-family:inherit; color:var(--ink);}
+.field:focus{border-color:var(--sage-dark);}
+.choice-grid{display:flex; flex-direction:column; gap:10px;}
+.choice-card{border:2px solid var(--line); background:var(--white); border-radius:var(--radius-md); padding:16px 18px; text-align:left; display:flex; align-items:center; gap:14px; transition:.15s;}
+.choice-card.selected{border-color:var(--forest); background:linear-gradient(0deg, rgba(51,81,47,0.06), rgba(51,81,47,0.06)), var(--white);}
+.choice-emoji{font-size:26px;}
+.choice-text b{display:block; font-size:15px;}
+.choice-text span{display:block; font-size:12.5px; color:var(--ink-soft); margin-top:2px;}
+.onb-nav{display:flex; gap:10px; margin-top:20px;}
+
+/* ---------- Top bar / nav ---------- */
+.topbar{display:flex; align-items:center; justify-content:space-between; padding:22px 20px 6px;}
+.greet-eyebrow{font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.12em; color:var(--sage-dark);}
+.greet-title{font-size:24px; margin:2px 0 0;}
+.streak-pill{display:flex; align-items:center; gap:6px; background:var(--white); border-radius:100px; padding:8px 14px; box-shadow:var(--shadow-sm); font-family:var(--font-mono); font-weight:700; font-size:14px;}
+
+.tabbar{position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:480px; background:rgba(251,247,238,0.9); backdrop-filter:blur(14px); border-top:1px solid var(--line); display:flex; padding:10px 14px calc(10px + env(safe-area-inset-bottom)); z-index:40;}
+.tab{flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; background:none; border:none; color:var(--ink-soft); font-size:11px; font-weight:600; padding:6px 0; border-radius:14px;}
+.tab.active{color:var(--forest);}
+.tab .ic{font-size:20px;}
+
+/* ---------- Cards ---------- */
+.card{background:var(--white); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); padding:22px; margin:14px 20px;}
+.card-glass{background:linear-gradient(160deg, rgba(255,255,255,0.75), rgba(255,255,255,0.45)); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,0.6);}
+
+/* ---------- Yorkie hero card ---------- */
+.yorkie-card{position:relative; margin:14px 20px; border-radius:var(--radius-lg); padding:22px 20px 18px; overflow:hidden; box-shadow:var(--shadow-md); background:var(--bg-scene, linear-gradient(180deg, #CFE7D8 0%, #EAF3E3 55%, #F7F2E2 100%));}
+.yorkie-card .scene-deco{position:absolute; inset:0; pointer-events:none; opacity:.5;}
+.yorkie-stage{position:relative; display:flex; justify-content:center; padding:6px 0 10px;}
+.speech{position:relative; background:var(--white); border-radius:18px; padding:12px 16px; font-size:13.5px; font-weight:600; max-width:78%; margin:0 auto 6px; box-shadow:var(--shadow-sm); text-align:center; line-height:1.4;}
+.speech:after{content:""; position:absolute; bottom:-7px; left:50%; transform:translateX(-50%) rotate(45deg); width:14px; height:14px; background:var(--white);}
+.quote-line{text-align:center; font-family:var(--font-display); font-style:italic; font-size:14.5px; color:var(--forest-deep); margin-top:6px; padding:0 10px;}
+
+/* ---------- Progress bar ---------- */
+.progress-track{width:100%; height:14px; border-radius:100px; background:var(--cream-2); overflow:hidden; box-shadow:inset 0 1px 3px rgba(0,0,0,0.08);}
+.progress-fill{height:100%; border-radius:100px; background:linear-gradient(90deg, var(--sage-dark), var(--forest)); transition:width .6s cubic-bezier(.2,.9,.3,1);}
+.stat-row{display:flex; gap:10px; margin-top:14px;}
+.stat-box{flex:1; background:var(--cream-2); border-radius:16px; padding:12px 10px; text-align:center;}
+.stat-box .n{font-family:var(--font-mono); font-weight:700; font-size:18px; color:var(--forest-deep);}
+.stat-box .l{font-size:10.5px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.06em; margin-top:2px;}
+
+/* ---------- Tasks ---------- */
+.section-title{font-size:18px; margin:22px 20px 10px; display:flex; align-items:center; justify-content:space-between;}
+.task-list{margin:0 20px; display:flex; flex-direction:column; gap:10px;}
+.task-item{display:flex; align-items:center; gap:14px; background:var(--white); border-radius:18px; padding:14px 16px; box-shadow:var(--shadow-sm); transition:.15s;}
+.task-item.done{opacity:.6;}
+.task-check{width:28px; height:28px; min-width:28px; border-radius:50%; border:2.5px solid var(--sage-dark); display:flex; align-items:center; justify-content:center; background:var(--white); transition:.15s; flex-shrink:0;}
+.task-check.checked{background:var(--forest); border-color:var(--forest);}
+.task-check.checked:after{content:"✓"; color:var(--white); font-size:14px; font-weight:700;}
+.task-label{font-size:14.5px; font-weight:600; flex:1;}
+.task-item.done .task-label{text-decoration:line-through; text-decoration-color:var(--sage-dark);}
+.task-xp{font-family:var(--font-mono); font-size:11.5px; color:var(--gold); font-weight:700;}
+
+/* ---------- Paw trail (milestone signature element) ---------- */
+.pawtrail-wrap{margin:14px 20px; background:var(--white); border-radius:var(--radius-lg); padding:20px; box-shadow:var(--shadow-sm);}
+.pawtrail{position:relative; height:60px; margin-top:10px;}
+.pawtrail-line{position:absolute; top:29px; left:12px; right:12px; height:3px; background:var(--line); border-radius:3px;}
+.pawtrail-fill{position:absolute; top:29px; left:12px; height:3px; background:var(--forest); border-radius:3px; transition:width .8s ease;}
+.paw-stop{position:absolute; top:12px; width:36px; height:36px; margin-left:-18px; border-radius:50%; background:var(--cream-2); border:2px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:15px;}
+.paw-stop.reached{background:var(--forest); border-color:var(--forest); color:var(--cream);}
+.paw-stop.current{box-shadow:0 0 0 5px rgba(51,81,47,0.15);}
+
+/* ---------- Badges ---------- */
+.badge-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:14px 20px;}
+.badge-tile{aspect-ratio:1; background:var(--white); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:22px; box-shadow:var(--shadow-sm); position:relative;}
+.badge-tile.locked{filter:grayscale(1); opacity:.35;}
+.badge-tile .bname{position:absolute; bottom:-16px; font-size:8.5px; text-align:center; width:100%; color:var(--ink-soft); left:0;}
+
+/* ---------- Calendar ---------- */
+.cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-top:12px;}
+.cal-cell{aspect-ratio:1; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--ink-soft); background:var(--cream-2);}
+.cal-cell.full{background:var(--forest); color:var(--cream);}
+.cal-cell.partial{background:var(--sage);}
+.cal-cell.empty-day{background:var(--cream-2); color:transparent;}
+
+/* ---------- Weekly bars ---------- */
+.week-bars{display:flex; align-items:flex-end; gap:8px; height:90px; margin-top:14px;}
+.wb-col{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; gap:6px;}
+.wb-bar{width:100%; border-radius:6px 6px 3px 3px; background:var(--cream-2); position:relative; overflow:hidden;}
+.wb-bar-fill{position:absolute; bottom:0; left:0; right:0; background:linear-gradient(180deg, var(--sage), var(--forest)); border-radius:6px 6px 3px 3px;}
+.wb-label{font-size:9.5px; color:var(--ink-soft);}
+
+/* ---------- Shop ---------- */
+.shop-tabs{display:flex; gap:8px; margin:14px 20px 4px; overflow-x:auto; padding-bottom:4px;}
+.shop-tab{white-space:nowrap; padding:8px 14px; border-radius:100px; background:var(--white); border:1.5px solid var(--line); font-size:12.5px; font-weight:700; color:var(--ink-soft);}
+.shop-tab.active{background:var(--forest); color:var(--cream); border-color:var(--forest);}
+.shop-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:10px 20px 20px;}
+.shop-item{background:var(--white); border-radius:18px; padding:14px; box-shadow:var(--shadow-sm); text-align:center;}
+.shop-swatch{width:52px; height:52px; border-radius:50%; margin:0 auto 8px; display:flex; align-items:center; justify-content:center; font-size:24px;}
+.shop-name{font-size:12.5px; font-weight:700;}
+.shop-cost{font-family:var(--font-mono); font-size:11.5px; color:var(--gold); margin:4px 0 8px;}
+
+/* ---------- Modal / confetti / toast ---------- */
+.overlay{position:fixed; inset:0; background:rgba(32,58,32,0.55); display:flex; align-items:center; justify-content:center; z-index:100; padding:24px; opacity:0; pointer-events:none; transition:opacity .25s;}
+.overlay.show{opacity:1; pointer-events:auto;}
+.modal{background:var(--cream); border-radius:26px; padding:30px 26px; max-width:360px; width:100%; text-align:center; box-shadow:var(--shadow-lg); transform:scale(.9); transition:transform .25s;}
+.overlay.show .modal{transform:scale(1);}
+.modal-emoji{font-size:52px; margin-bottom:6px;}
+.modal-title{font-size:22px; margin:4px 0 8px;}
+.modal-sub{color:var(--ink-soft); font-size:14px; line-height:1.5; margin-bottom:20px;}
+#confettiLayer{position:fixed; inset:0; pointer-events:none; z-index:200; overflow:hidden;}
+.confetto{position:absolute; top:-20px; border-radius:2px; animation:confFall linear forwards;}
+@keyframes confFall{to{transform:translateY(110vh) rotate(400deg); opacity:.9;}}
+.toast{position:fixed; bottom:110px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--forest-deep); color:var(--cream); padding:12px 20px; border-radius:100px; font-size:13px; font-weight:600; box-shadow:var(--shadow-md); opacity:0; transition:.3s; z-index:150; white-space:nowrap;}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+/* ---------- Yorkie SVG animation ---------- */
+.yorkie-svg{width:170px; height:150px; overflow:visible;}
+.yk-tail{transform-origin:150px 95px; animation:none;}
+.yorkie-svg.wag .yk-tail{animation:tailwag .35s ease-in-out infinite alternate;}
+@keyframes tailwag{from{transform:rotate(-14deg);} to{transform:rotate(14deg);}}
+.yk-body-group{transform-origin:85px 130px;}
+.yorkie-svg.jump .yk-body-group{animation:jumpy .6s ease-in-out;}
+@keyframes jumpy{0%{transform:translateY(0);}30%{transform:translateY(-22px);}55%{transform:translateY(0);}70%{transform:translateY(-8px);}100%{transform:translateY(0);}}
+.yorkie-svg.celebrate .yk-body-group{animation:jumpy .5s ease-in-out infinite;}
+.yk-eye-l,.yk-eye-r{transition:.15s;}
+.yorkie-svg.sleep .yk-eye-l,.yorkie-svg.sleep .yk-eye-r{transform:scaleY(0.12);}
+.yk-mouth{transform-origin:85px 108px;}
+.yorkie-svg.bark .yk-mouth{animation:barkanim .3s ease-in-out 3;}
+@keyframes barkanim{0%,100%{transform:scaleY(1);}50%{transform:scaleY(1.8) translateY(2px);}}
+.yk-paw-l{transform-origin:60px 128px;}
+.yorkie-svg.wave .yk-paw-l{animation:wavepaw .4s ease-in-out 3;}
+@keyframes wavepaw{0%,100%{transform:rotate(0deg);}50%{transform:rotate(-45deg) translate(-4px,-8px);}}
+.yk-zzz{opacity:0; font-family:var(--font-display); font-weight:700; fill:var(--sage-dark);}
+.yorkie-svg.sleep .yk-zzz{opacity:1; animation:floatzzz 2s ease-in-out infinite;}
+@keyframes floatzzz{0%{transform:translateY(0); opacity:.3;}50%{transform:translateY(-8px); opacity:1;}100%{transform:translateY(-16px); opacity:0;}}
+.yk-think{opacity:0;}
+.yorkie-svg.think .yk-think{opacity:1;}
+
+/* ---------- Empty / misc ---------- */
+.empty-hint{text-align:center; color:var(--ink-soft); font-size:13px; padding:30px 20px;}
+.settings-row{display:flex; align-items:center; justify-content:space-between; padding:14px 0; border-bottom:1px solid var(--line);}
+.settings-row:last-child{border-bottom:none;}
+.hidden{display:none !important;}
+::selection{background:var(--sage); color:var(--forest-deep);}
+</style>
+</head>
+<body>
+
+<div id="confettiLayer"></div>
+<div class="toast" id="toast"></div>
+
+<div id="app">
+
+  <!-- ============ ONBOARDING ============ -->
+  <div id="onboarding"></div>
+
+  <!-- ============ MAIN APP ============ -->
+  <div id="mainApp" class="hidden">
+    <div id="screenHome"></div>
+    <div id="screenProgress" class="hidden"></div>
+    <div id="screenRewards" class="hidden"></div>
+
+    <div class="tabbar">
+      <button class="tab active" data-tab="home"><span class="ic">🏠</span>Home</button>
+      <button class="tab" data-tab="progress"><span class="ic">📈</span>Progress</button>
+      <button class="tab" data-tab="rewards"><span class="ic">🎁</span>Rewards</button>
+    </div>
+  </div>
+
+  <!-- ============ MODAL ============ -->
+  <div class="overlay" id="overlay">
+    <div class="modal" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* =====================================================================
+   DATA
+===================================================================== */
+const STORAGE_KEY = 'goalpup_state_v1';
+
+const MOTIVATION = [
+"Small progress is still progress.","You don't have to be perfect, just consistent.",
+"One task today beats zero tomorrow.","Consistency wins over intensity.",
+"Future you will thank you for today.","Every rep, every page, every minute counts.",
+"You showed up. That's the hard part.","Tiny steps still move the needle.",
+"Progress isn't a straight line, and that's okay.","You're allowed to go slow, just don't stop.",
+"Discipline is choosing what you want most over what you want now.","Today's effort is tomorrow's habit.",
+"You don't need motivation, you need a next step.","Comparison steals joy, keep your eyes on your own path.",
+"The goal is progress, not perfection.","A little bit today adds up to a lot this year.",
+"You're building someone your future self will admire.","Habits are votes for who you want to become.",
+"It's okay to rest, just don't quit.","Show up for yourself the way you'd show up for a friend.",
+"Great things are built one boring, ordinary day at a time.","You are exactly where you need to be right now.",
+"Momentum loves company, keep moving.","Done is better than perfect.",
+"Your only competition is who you were yesterday.","Small wins stack into big transformations.",
+"Trust the process, even on the slow days.","Nobody starts great, they start and get great.",
+"You've already made it through 100% of your hard days.","Keep going, the dog believes in you.",
+"Effort compounds, just like interest.","This is your season of quiet building.",
+"You are not behind, you are on your own timeline.","One honest step beats ten imagined leaps.",
+"Celebrate the small stuff, it's not small.","Your future self is watching, make them proud.",
+"Consistency is a superpower disguised as boredom.","Rest is part of the plan, not a break from it.",
+"You get to decide what today means for your goal.","Even the slowest step forward is still forward.",
+"You're not starting over, you're starting from experience.","Discomfort today is confidence tomorrow.",
+"Keep your promises to yourself, they matter most.","The comeback is always stronger than the setback.",
+"Progress loves patience.","You are one decision away from a better day.",
+"Just show up. The rest tends to follow.","Every expert was once a beginner who didn't quit.",
+"Your goal doesn't care how you feel, just that you show up.","Tiny habits, huge identity shifts.",
+"You're allowed to be proud of small steps.","Growth is quiet before it's loud.",
+"做好準備，慢慢來也可以。Take it slow, it still counts.","Today is a fresh page, write something good on it.",
+"You're not chasing perfect, you're chasing better.","One percent better every day adds up fast.",
+"The dog is proud of you, whatever today looked like.","Your effort today is invisible compound interest.",
+"Some days you crawl toward the goal. That still counts.","Real change is boring, unglamorous, and repeated.",
+"You control the effort, not the outcome, so give the effort.","Keep the streak of trying, even if the streak of winning breaks."
+];
+
+// keyword -> category mapping
+const CATEGORY_KEYWORDS = {
+  "Weight Loss": ["lose weight","weight loss","slim","fat loss","shed pounds","lean out"],
+  "Fitness": ["fitness","workout","exercise","gym","strength","muscle","run","marathon","cardio","get fit"],
+  "Learning": ["learn","study","course","skill","certification","exam prep"],
+  "School": ["school","college","university","homework","grades","gpa","class","semester"],
+  "Saving Money": ["save money","savings","budget","debt","finance","financial","emergency fund"],
+  "Starting a Business": ["business","startup","entrepreneur","side hustle","launch a product","freelance"],
+  "Reading": ["read more","reading","books","read a book","novel"],
+  "Writing": ["write","writing","novel","blog","journal","book"],
+  "Drawing": ["draw","drawing","sketch","art","illustration","paint"],
+  "Music": ["music","guitar","piano","sing","instrument","band","song"],
+  "Productivity": ["productiv","focus","procrastinat","organize my time","get things done"],
+  "Mental Health": ["mental health","anxiety","stress","mindful","meditat","therapy","self care","depression"],
+  "Building Habits": ["habit","routine","discipline","consistency"],
+  "Organization": ["organize","declutter","clean","tidy","organization"],
+  "Coding": ["code","coding","programming","developer","software","web dev","app dev"],
+  "Language Learning": ["spanish","french","language","fluent","japanese","german","learn a language","italian","mandarin","korean"]
+};
+
+const CATEGORY_META = {
+  "Weight Loss":{emoji:"🏃‍♀️", flavor:["First Mile","Steady Burn","Halfway There","Strong & Steady","New You Milestone"]},
+  "Fitness":{emoji:"💪", flavor:["First Sweat","Building Strength","Iron Habit","Peak Form","Fitness Champion"]},
+  "Learning":{emoji:"🧠", flavor:["Curious Start","Growing Knowledge","Deep Focus","Almost Expert","Mastery Milestone"]},
+  "School":{emoji:"🎓", flavor:["Syllabus Started","Midterm Mindset","Study Streak","Final Stretch","Top of the Class"]},
+  "Saving Money":{emoji:"💰", flavor:["First Deposit","Budget Builder","Cushion Growing","Nest Egg","Financial Milestone"]},
+  "Starting a Business":{emoji:"🚀", flavor:["Idea Sparked","Market Mapped","First Draft Plan","Launch Ready","Founder Milestone"]},
+  "Reading":{emoji:"📚", flavor:["First Chapter","Bookworm Rising","Page Turner","Halfway Shelf","Reading Milestone"]},
+  "Writing":{emoji:"✍️", flavor:["First Words","Finding Voice","Chapter Complete","Draft Deepens","Writer's Milestone"]},
+  "Drawing":{emoji:"🎨", flavor:["First Sketch","Steady Hand","Style Emerging","Portfolio Growing","Artist Milestone"]},
+  "Music":{emoji:"🎵", flavor:["First Notes","Finding Rhythm","Clean Chords","Song Ready","Musician Milestone"]},
+  "Productivity":{emoji:"⏱️", flavor:["Cleared Inbox","Focus Found","Routine Set","Deep Work Mode","Productivity Milestone"]},
+  "Mental Health":{emoji:"🌿", flavor:["First Breath","Calmer Days","Grounded Routine","Steady Mind","Wellbeing Milestone"]},
+  "Building Habits":{emoji:"🔁", flavor:["Habit Seeded","Taking Root","Becoming Automatic","Second Nature","Identity Milestone"]},
+  "Organization":{emoji:"🗂️", flavor:["First Drawer","Decluttered Zone","System Set","Everything Has a Home","Organized Milestone"]},
+  "Coding":{emoji:"💻", flavor:["Hello World","First Feature","Debug Master","Shipping Code","Developer Milestone"]},
+  "Language Learning":{emoji:"🗣️", flavor:["First Words","Small Talk Ready","Conversation Flowing","Thinking in Language","Fluency Milestone"]},
+  "General":{emoji:"🌟", flavor:["First Step","Building Momentum","Halfway Point","Almost There","Goal Milestone"]}
+};
+
+// task pools: function(diff, week) -> array of 3 task strings
+function scale(base, perWeek, cap, week){ return Math.min(cap, base + perWeek*Math.max(0,week-1)); }
+const DIFF_MULT = {Easy:0.7, Balanced:1, Challenging:1.4};
+
+const TASK_GENERATORS = {
+"Weight Loss": (d,w)=>{const m=DIFF_MULT[d]; const mins=Math.round(scale(15,3,45,w)*m); return [
+  `Walk ${mins} minutes`, `Drink ${Math.round(6*m)} glasses of water`, `Eat one extra serving of vegetables today`];},
+"Fitness": (d,w)=>{const m=DIFF_MULT[d]; const reps=Math.round(scale(10,2,30,w)*m); return [
+  `Do a ${Math.round(15*m)}-minute workout`, `${reps} bodyweight squats`, `Stretch for 5 minutes`];},
+"Learning": (d,w)=>{const m=DIFF_MULT[d]; const mins=Math.round(scale(15,3,50,w)*m); return [
+  `Study for ${mins} minutes`, `Take notes on one new concept`, `Quiz yourself on yesterday's material`];},
+"School": (d,w)=>{const m=DIFF_MULT[d]; const mins=Math.round(scale(20,3,60,w)*m); return [
+  `Work on homework for ${mins} minutes`, `Review today's class notes`, `Prep materials for tomorrow's class`];},
+"Saving Money": (d,w)=>{const m=DIFF_MULT[d]; const amt=Math.round(scale(2,1,10,w)*m); return [
+  `Set aside $${amt} in savings`, `Track today's spending`, `Skip one non-essential purchase`];},
+"Starting a Business": (d,w)=>[
+  `Research one competitor`, `Spend ${Math.round(20*DIFF_MULT[d])} minutes on your business plan`, `Reach out to one potential customer or mentor`],
+"Reading": (d,w)=>{const m=DIFF_MULT[d]; const pages=Math.round(scale(10,2,30,w)*m); return [
+  `Read ${pages} pages`, `Write one takeaway from today's reading`, `Bookmark where you'll pick up tomorrow`];},
+"Writing": (d,w)=>{const m=DIFF_MULT[d]; const words=Math.round(scale(150,50,600,w)*m); return [
+  `Write ${words} words`, `Edit yesterday's page`, `Jot down one new idea for later`];},
+"Drawing": (d,w)=>{const m=DIFF_MULT[d]; const mins=Math.round(scale(15,3,45,w)*m); return [
+  `Sketch for ${mins} minutes`, `Practice one new technique`, `Study a reference image for 5 minutes`];},
+"Music": (d,w)=>{const m=DIFF_MULT[d]; const mins=Math.round(scale(15,3,45,w)*m); return [
+  `Practice for ${mins} minutes`, `Run through scales or basics`, `Play one song section slowly`];},
+"Productivity": (d,w)=>[
+  `Plan tomorrow's top 3 priorities`, `Do a ${Math.round(15*DIFF_MULT[d])}-minute focus sprint`, `Clear one small task off your list`],
+"Mental Health": (d,w)=>{const m=DIFF_MULT[d]; const mins=Math.round(scale(5,1,20,w)*m); return [
+  `Meditate or breathe deeply for ${mins} minutes`, `Write one thing you're grateful for`, `Step outside for fresh air`];},
+"Building Habits": (d,w)=>[
+  `Complete your habit for today`, `Log how it went in a few words`, `Prepare anything you'll need for tomorrow`],
+"Organization": (d,w)=>[
+  `Organize one small area for ${Math.round(15*DIFF_MULT[d])} minutes`, `Remove 5 things you don't need`, `Put one thing back where it belongs`],
+"Coding": (d,w)=>{const m=DIFF_MULT[d]; const mins=Math.round(scale(20,4,60,w)*m); return [
+  `Code for ${mins} minutes`, `Fix or refactor one small piece`, `Read about one new concept`];},
+"Language Learning": (d,w)=>{const m=DIFF_MULT[d]; const words=Math.round(scale(8,2,20,w)*m); return [
+  `Practice for ${Math.round(15*m)} minutes`, `Learn ${words} new words`, `Review yesterday's lesson`];},
+"General": (d,w)=>{const m=DIFF_MULT[d]; const mins=Math.round(scale(15,3,45,w)*m); return [
+  `Spend ${mins} minutes working toward your goal`, `Write down one small win from today`, `Plan your next small step`];}
+};
+
+const BADGES = [
+  {id:"first_task", name:"First Step", emoji:"🐾", cond:s=>s.totalTasksCompleted>=1},
+  {id:"perfect_day", name:"Perfect Day", emoji:"✅", cond:s=>s.perfectDays>=1},
+  {id:"streak3", name:"3-Day Streak", emoji:"🔥", cond:s=>s.streak>=3},
+  {id:"streak7", name:"Week Warrior", emoji:"⭐", cond:s=>s.streak>=7},
+  {id:"streak30", name:"Unstoppable", emoji:"🏆", cond:s=>s.streak>=30},
+  {id:"level5", name:"Level 5", emoji:"🎖️", cond:s=>s.level>=5},
+  {id:"level10", name:"Level 10", emoji:"👑", cond:s=>s.level>=10},
+  {id:"xp500", name:"500 XP Club", emoji:"💫", cond:s=>s.xp>=500},
+  {id:"tasks50", name:"50 Tasks Done", emoji:"📋", cond:s=>s.totalTasksCompleted>=50},
+  {id:"milestone1", name:"First Milestone", emoji:"🚩", cond:s=>s.milestonesReached>=1},
+  {id:"perfect7", name:"7 Perfect Days", emoji:"🌟", cond:s=>s.perfectDays>=7},
+  {id:"coins50", name:"Coin Collector", emoji:"🪙", cond:s=>s.coins>=50}
+];
+
+const SHOP_ITEMS = [
+  {id:"hat_none", type:"hat", name:"No Hat", cost:0, emoji:"—", color:"transparent"},
+  {id:"hat_red", type:"hat", name:"Red Cap", cost:20, emoji:"🧢", color:"#C1543F"},
+  {id:"hat_top", type:"hat", name:"Top Hat", cost:60, emoji:"🎩", color:"#2E2B22"},
+  {id:"hat_crown", type:"hat", name:"Crown", cost:150, emoji:"👑", color:"#D8AC5C"},
+  {id:"hat_flower", type:"hat", name:"Flower Crown", cost:90, emoji:"🌼", color:"#EADFC4"},
+  {id:"band_none", type:"bandana", name:"No Bandana", cost:0, emoji:"—", color:"transparent"},
+  {id:"band_sky", type:"bandana", name:"Sky Bandana", cost:15, emoji:"🔷", color:"#AAD1E6"},
+  {id:"band_forest", type:"bandana", name:"Forest Bandana", cost:15, emoji:"🟩", color:"#33512F"},
+  {id:"band_polka", type:"bandana", name:"Polka Bandana", cost:35, emoji:"⚪", color:"#D8AC5C"},
+  {id:"bg_meadow", type:"background", name:"Meadow", cost:0, emoji:"🌿", value:"linear-gradient(180deg, #CFE7D8 0%, #EAF3E3 55%, #F7F2E2 100%)"},
+  {id:"bg_sky", type:"background", name:"Blue Sky", cost:25, emoji:"☁️", value:"linear-gradient(180deg, #BEE0EE 0%, #E7F2E9 55%, #F7F2E2 100%)"},
+  {id:"bg_sunset", type:"background", name:"Sunset", cost:70, emoji:"🌅", value:"linear-gradient(180deg, #F2D9B1 0%, #F2E3D0 55%, #F7F2E2 100%)"},
+  {id:"bg_night", type:"background", name:"Starry Night", cost:120, emoji:"🌙", value:"linear-gradient(180deg, #34435C 0%, #7C93A8 55%, #F7F2E2 100%)"},
+  {id:"bed_basic", type:"bed", name:"Basic Bed", cost:0, emoji:"🛏️"},
+  {id:"bed_cozy", type:"bed", name:"Cozy Cushion", cost:30, emoji:"🧺"},
+  {id:"bed_royal", type:"bed", name:"Royal Bed", cost:100, emoji:"👑🛏️"},
+  {id:"jar_basic", type:"jar", name:"Treat Jar", cost:0, emoji:"🍪"},
+  {id:"jar_gold", type:"jar", name:"Golden Jar", cost:45, emoji:"🏺"},
+  {id:"jar_rainbow", type:"jar", name:"Rainbow Jar", cost:85, emoji:"🌈"},
+  {id:"theme_default", type:"theme", name:"Cream & Sage", cost:0, emoji:"🎨"},
+  {id:"theme_ocean", type:"theme", name:"Sky & Sage", cost:50, emoji:"🌊"},
+  {id:"theme_gold", type:"theme", name:"Golden Hour", cost:110, emoji:"✨"}
+];
+
+/* =====================================================================
+   STATE
+===================================================================== */
+function todayStr(d){ d = d||new Date(); return d.toISOString().slice(0,10); }
+
+function defaultState(){
+  return {
+    onboarded:false,
+    name:"", goal:"", targetDate:"", minutesPerDay:15, difficulty:"Balanced",
+    category:"General",
+    xp:0, coins:0, level:1, streak:0, longestStreak:0,
+    totalTasksCompleted:0, perfectDays:0, milestonesReached:0,
+    dayCount:0, // number of days the app has generated tasks for
+    lastActiveDate:null,
+    todaysTasks:[], // {label, done}
+    history:{}, // dateStr -> {completed, total}
+    ownedItems:["hat_none","band_none","bg_meadow","bed_basic","jar_basic","theme_default"],
+    equipped:{hat:"hat_none", bandana:"band_none", background:"bg_meadow", bed:"bed_basic", jar:"jar_basic", theme:"theme_default"},
+    ownedBadges:[],
+    dailyQuoteDate:null, dailyQuoteText:""
+  };
+}
+
+let state = loadState();
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return defaultState();
+    const parsed = JSON.parse(raw);
+    return Object.assign(defaultState(), parsed);
+  }catch(e){ return defaultState(); }
+}
+function saveState(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+}
+
+/* =====================================================================
+   UTIL
+===================================================================== */
+function detectCategory(goalText){
+  const t = goalText.toLowerCase();
+  for(const cat in CATEGORY_KEYWORDS){
+    for(const kw of CATEGORY_KEYWORDS[cat]){
+      if(t.includes(kw)) return cat;
+    }
+  }
+  return "General";
+}
+function xpForLevel(level){ return level*100; }
+function levelFromXp(xp){ let lvl=1; while(xp >= xpForLevel(lvl)) { xp -= xpForLevel(lvl); lvl++; } return lvl; }
+function seededQuote(dateStr){
+  let hash=0; for(let i=0;i<dateStr.length;i++){ hash = (hash*31 + dateStr.charCodeAt(i))>>>0; }
+  return MOTIVATION[hash % MOTIVATION.length];
+}
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+function fireConfetti(n){
+  n = n||60;
+  const layer = document.getElementById('confettiLayer');
+  const colors = ['#9CB899','#AAD1E6','#D8AC5C','#33512F','#EADFC4'];
+  for(let i=0;i<n;i++){
+    const el = document.createElement('div');
+    el.className='confetto';
+    const size = 6+Math.random()*6;
+    el.style.width = size+'px';
+    el.style.height = (size*0.4+4)+'px';
+    el.style.left = (Math.random()*100)+'vw';
+    el.style.background = colors[Math.floor(Math.random()*colors.length)];
+    el.style.animationDuration = (2.2+Math.random()*1.6)+'s';
+    el.style.transform = `rotate(${Math.random()*360}deg)`;
+    layer.appendChild(el);
+    setTimeout(()=>el.remove(), 4200);
+  }
+}
+function openModal(html){
+  document.getElementById('modalBody').innerHTML = html;
+  document.getElementById('overlay').classList.add('show');
+}
+function closeModal(){ document.getElementById('overlay').classList.remove('show'); }
+window.closeModal = closeModal;
+
+/* =====================================================================
+   YORKIE SVG RENDERER
+===================================================================== */
+function yorkieSVG(mood){
+  mood = mood || 'idle';
+  const eq = state.equipped;
+  const hat = SHOP_ITEMS.find(i=>i.id===eq.hat);
+  const band = SHOP_ITEMS.find(i=>i.id===eq.bandana);
+  let hatSvg = '';
+  if(hat && hat.id!=='hat_none'){
+    if(hat.id==='hat_top'){
+      hatSvg = `<g><rect x="63" y="18" width="34" height="26" rx="3" fill="${hat.color}"/><rect x="55" y="42" width="50" height="7" rx="3" fill="${hat.color}"/></g>`;
+    } else if(hat.id==='hat_crown'){
+      hatSvg = `<polygon points="58,42 66,20 76,36 85,18 94,36 104,20 112,42" fill="${hat.color}" stroke="#b8863f" stroke-width="1.5"/>`;
+    } else if(hat.id==='hat_flower'){
+      hatSvg = `<g>${[60,75,90,105].map(x=>`<circle cx="${x}" cy="38" r="6" fill="#F2C6D6"/><circle cx="${x}" cy="38" r="2.4" fill="#D8AC5C"/>`).join('')}</g>`;
+    } else {
+      hatSvg = `<ellipse cx="85" cy="34" rx="30" ry="14" fill="${hat.color}"/><ellipse cx="85" cy="26" rx="18" ry="14" fill="${hat.color}"/>`;
+    }
+  }
+  let bandSvg = '';
+  if(band && band.id!=='band_none'){
+    bandSvg = `<polygon points="65,108 105,108 95,124 75,124" fill="${band.color}"/>`;
+  }
+  const isSleep = mood==='sleep';
+  return `
+  <svg class="yorkie-svg ${mood}" viewBox="0 0 170 150" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <ellipse cx="85" cy="138" rx="55" ry="8" fill="rgba(46,43,34,0.08)"/>
+    <g class="yk-tail"><path d="M150 100 Q168 85 158 65" stroke="#8a6a4a" stroke-width="11" fill="none" stroke-linecap="round"/></g>
+    <g class="yk-body-group">
+      <ellipse cx="85" cy="108" rx="46" ry="34" fill="#C7A374"/>
+      <path d="M45 108 Q85 130 125 108" fill="#EFE0C4"/>
+      <g class="yk-paw-l"><ellipse cx="60" cy="132" rx="10" ry="9" fill="#EFE0C4"/></g>
+      <ellipse cx="112" cy="132" rx="10" ry="9" fill="#EFE0C4"/>
+      ${bandSvg}
+      <ellipse cx="85" cy="78" rx="34" ry="30" fill="#C7A374"/>
+      <path d="M58 60 Q45 22 65 40 Q70 55 58 60Z" fill="#8a6a4a"/>
+      <path d="M112 60 Q125 22 105 40 Q100 55 112 60Z" fill="#8a6a4a"/>
+      <path d="M60 66 Q80 90 60 96" fill="#EFE0C4" opacity="0.9"/>
+      <path d="M110 66 Q90 90 110 96" fill="#EFE0C4" opacity="0.9"/>
+      ${hatSvg}
+      <ellipse class="yk-eye-l" cx="72" cy="76" rx="4.2" ry="${isSleep?1:5.2}" fill="#2E2B22"/>
+      <ellipse class="yk-eye-r" cx="98" cy="76" rx="4.2" ry="${isSleep?1:5.2}" fill="#2E2B22"/>
+      <ellipse cx="85" cy="90" rx="7" ry="5" fill="#5b463a"/>
+      <path class="yk-mouth" d="M78 98 Q85 104 92 98" stroke="#5b463a" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+    </g>
+    <text class="yk-zzz" x="128" y="46" font-size="16">Z</text>
+    <text class="yk-zzz" x="140" y="34" font-size="12" style="animation-delay:.4s">z</text>
+    <g class="yk-think">
+      <circle cx="132" cy="52" r="4" fill="#fff" stroke="#ddd"/>
+      <circle cx="142" cy="40" r="6" fill="#fff" stroke="#ddd"/>
+      <circle cx="156" cy="24" r="14" fill="#fff" stroke="#ddd"/>
+      <text x="150" y="29" font-size="14">💭</text>
+    </g>
+  </svg>`;
+}
+
+/* =====================================================================
+   ONBOARDING
+===================================================================== */
+const onbState = { step:0, name:"", goal:"", targetDate:"", minutes:15, difficulty:"" };
+
+function renderOnboarding(){
+  const steps = ["name","goal","date","minutes","difficulty","ready"];
+  const step = steps[onbState.step];
+  const container = document.getElementById('onboarding');
+  const dots = steps.slice(0,5).map((s,i)=>`<div class="onb-dot ${i<onbState.step || (i===onbState.step) ? (i<onbState.step?'done':'') : ''} ${i<=onbState.step?'done':''}"></div>`).join('');
+
+  let body = '';
+  if(step==='name'){
+    body = `
+      <div class="onb-eyebrow">Welcome</div>
+      <h1 class="onb-title">What should GoalPup call you?</h1>
+      <p class="onb-sub">Your Yorkie coach wants to know your name.</p>
+      <input class="field" id="inpName" placeholder="Your name" value="${escapeHtml(onbState.name)}" autofocus>`;
+  } else if(step==='goal'){
+    body = `
+      <div class="onb-eyebrow">Step 2 of 5</div>
+      <h1 class="onb-title">What's your main goal?</h1>
+      <p class="onb-sub">Be as specific as you like — GoalPup will build a plan around it.</p>
+      <input class="field" id="inpGoal" placeholder="e.g. Learn Spanish, Lose weight, Read more books" value="${escapeHtml(onbState.goal)}">`;
+  } else if(step==='date'){
+    body = `
+      <div class="onb-eyebrow">Step 3 of 5 · Optional</div>
+      <h1 class="onb-title">Any target date?</h1>
+      <p class="onb-sub">Skip this if you're not sure — you can always add it later.</p>
+      <input class="field" type="date" id="inpDate" value="${onbState.targetDate}">`;
+  } else if(step==='minutes'){
+    body = `
+      <div class="onb-eyebrow">Step 4 of 5</div>
+      <h1 class="onb-title">How many minutes a day can you give this?</h1>
+      <p class="onb-sub">GoalPup will size your daily tasks to fit.</p>
+      <div class="choice-grid" id="minutesGrid">
+        ${[5,15,30,60].map(m=>`<button class="choice-card ${onbState.minutes===m?'selected':''}" data-min="${m}">
+          <span class="choice-emoji">⏱️</span><span class="choice-text"><b>${m} minutes</b><span>${m<=5?'Just a taste':m<=15?'A steady habit':m<=30?'Solid daily effort':'Going all in'}</span></span>
+        </button>`).join('')}
+      </div>`;
+  } else if(step==='difficulty'){
+    body = `
+      <div class="onb-eyebrow">Step 5 of 5</div>
+      <h1 class="onb-title">Pick your pace</h1>
+      <p class="onb-sub">You can change this anytime in Settings.</p>
+      <div class="choice-grid" id="diffGrid">
+        <button class="choice-card ${onbState.difficulty==='Easy'?'selected':''}" data-diff="Easy"><span class="choice-emoji">🌱</span><span class="choice-text"><b>Easy</b><span>Gentle and forgiving</span></span></button>
+        <button class="choice-card ${onbState.difficulty==='Balanced'?'selected':''}" data-diff="Balanced"><span class="choice-emoji">🌤️</span><span class="choice-text"><b>Balanced</b><span>Steady and sustainable</span></span></button>
+        <button class="choice-card ${onbState.difficulty==='Challenging'?'selected':''}" data-diff="Challenging"><span class="choice-emoji">🔥</span><span class="choice-text"><b>Challenging</b><span>Push yourself daily</span></span></button>
+      </div>`;
+  } else if(step==='ready'){
+    const cat = detectCategory(onbState.goal||'General');
+    body = `
+      <div style="text-align:center;">
+        ${yorkieSVG('wag')}
+      </div>
+      <h1 class="onb-title" style="text-align:center;">Your roadmap is ready, ${escapeHtml(onbState.name)||'friend'}!</h1>
+      <p class="onb-sub" style="text-align:center;">GoalPup built a <b>${cat}</b> plan for "${escapeHtml(onbState.goal)}" — starting with tiny, doable steps.</p>`;
+  }
+
+  container.innerHTML = `
+    <div class="onb-wrap">
+      <div class="onb-progress">${step==='ready'?'':dots}</div>
+      <div class="onb-body">${body}</div>
+      <div class="onb-nav">
+        ${onbState.step>0 && step!=='ready' ? `<button class="btn btn-ghost" id="onbBack">Back</button>`:''}
+        <button class="btn btn-primary btn-block" id="onbNext">${step==='ready' ? "Let's start!" : 'Continue'}</button>
+      </div>
+    </div>`;
+
+  // wire events
+  if(step==='name'){
+    document.getElementById('inpName').addEventListener('input', e=>onbState.name=e.target.value);
+  }
+  if(step==='goal'){
+    document.getElementById('inpGoal').addEventListener('input', e=>onbState.goal=e.target.value);
+  }
+  if(step==='date'){
+    document.getElementById('inpDate').addEventListener('input', e=>onbState.targetDate=e.target.value);
+  }
+  if(step==='minutes'){
+    document.querySelectorAll('#minutesGrid .choice-card').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ onbState.minutes = parseInt(btn.dataset.min); renderOnboarding(); });
+    });
+  }
+  if(step==='difficulty'){
+    document.querySelectorAll('#diffGrid .choice-card').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ onbState.difficulty = btn.dataset.diff; renderOnboarding(); });
+    });
+  }
+  const backBtn = document.getElementById('onbBack');
+  if(backBtn) backBtn.addEventListener('click', ()=>{ onbState.step--; renderOnboarding(); });
+
+  document.getElementById('onbNext').addEventListener('click', ()=>{
+    if(step==='name'){ if(!onbState.name.trim()){ shake('inpName'); return;} }
+    if(step==='goal'){ if(!onbState.goal.trim()){ shake('inpGoal'); return;} }
+    if(step==='difficulty'){ if(!onbState.difficulty){ return; } }
+    if(step==='ready'){ finishOnboarding(); return; }
+    onbState.step++;
+    renderOnboarding();
+  });
+}
+function shake(id){
+  const el = document.getElementById(id);
+  el.style.borderColor = '#C1543F';
+  setTimeout(()=>el.style.borderColor='', 900);
+}
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function finishOnboarding(){
+  state.name = onbState.name.trim() || 'Friend';
+  state.goal = onbState.goal.trim();
+  state.targetDate = onbState.targetDate;
+  state.minutesPerDay = onbState.minutes;
+  state.difficulty = onbState.difficulty;
+  state.category = detectCategory(state.goal);
+  state.onboarded = true;
+  state.dayCount = 1;
+  state.lastActiveDate = todayStr();
+  state.todaysTasks = generateTasks().map(t=>({label:t, done:false}));
+  saveState();
+  document.getElementById('onboarding').classList.add('hidden');
+  document.getElementById('mainApp').classList.remove('hidden');
+  renderAll();
+}
+
+/* =====================================================================
+   TASK GENERATION / DAILY ROLLOVER
+===================================================================== */
+function generateTasks(loadReduced){
+  const week = Math.max(1, Math.ceil(state.dayCount/7));
+  const gen = TASK_GENERATORS[state.category] || TASK_GENERATORS.General;
+  let tasks = gen(state.difficulty, week);
+  if(loadReduced){ tasks = tasks.slice(0,2); } // reduce workload slightly after a zero day
+  return tasks;
+}
+
+function checkNewDay(){
+  const today = todayStr();
+  if(!state.lastActiveDate){ state.lastActiveDate = today; saveState(); return; }
+  if(state.lastActiveDate === today) return;
+
+  // finalize previous day
+  const prevTasks = state.todaysTasks || [];
+  const completed = prevTasks.filter(t=>t.done).length;
+  const total = prevTasks.length;
+  state.history[state.lastActiveDate] = {completed, total};
+
+  let reduceTomorrow = false;
+  if(total>0 && completed===total){
+    state.streak += 1;
+    state.longestStreak = Math.max(state.longestStreak, state.streak);
+    state.perfectDays += 1;
+  } else if(completed>0){
+    state.streak += 1; // partial still counts toward showing up
+    state.longestStreak = Math.max(state.longestStreak, state.streak);
+  } else if(total>0){
+    state.streak = 0;
+    reduceTomorrow = true;
+  }
+
+  state.dayCount += 1;
+  state.lastActiveDate = today;
+  state.todaysTasks = generateTasks(reduceTomorrow).map(t=>({label:t, done:false}));
+  state.dailyQuoteDate = null;
+  checkMilestones();
+  saveState();
+}
+
+/* =====================================================================
+   MILESTONES / BADGES / LEVEL
+===================================================================== */
+function milestoneDays(){ return [3,7,14,21,30,45,60,90]; }
+function checkMilestones(){
+  const days = milestoneDays();
+  const reachedCount = days.filter(d=>state.dayCount>=d).length;
+  if(reachedCount > state.milestonesReached){
+    state.milestonesReached = reachedCount;
+    state.coins += 15;
+    state.xp += 30;
+    recalcLevel();
+    setTimeout(()=>{
+      const meta = CATEGORY_META[state.category] || CATEGORY_META.General;
+      const title = meta.flavor[Math.min(reachedCount-1, meta.flavor.length-1)];
+      openModal(`<div class="modal-emoji">🚩</div><h2 class="modal-title">Milestone: ${title}!</h2>
+        <p class="modal-sub">You've stayed active for ${days[reachedCount-1]} days. GoalPup is doing a happy dance!</p>
+        <button class="btn btn-primary btn-block" onclick="closeModal()">Keep going</button>`);
+      fireConfetti(90);
+    }, 300);
+  }
+}
+function recalcLevel(){ state.level = levelFromXp(state.xp); }
+function checkBadges(){
+  let newly = [];
+  BADGES.forEach(b=>{
+    if(!state.ownedBadges.includes(b.id) && b.cond(state)){
+      state.ownedBadges.push(b.id);
+      newly.push(b);
+    }
+  });
+  if(newly.length){
+    saveState();
+    setTimeout(()=>{
+      const b = newly[0];
+      openModal(`<div class="modal-emoji">${b.emoji}</div><h2 class="modal-title">Badge Unlocked!</h2>
+        <p class="modal-sub"><b>${b.name}</b> — added to your collection.</p>
+        <button class="btn btn-primary btn-block" onclick="closeModal()">Nice!</button>`);
+      fireConfetti(70);
+    }, newly.length>0?350:0);
+  }
+}
+
+/* =====================================================================
+   TASK INTERACTIONS
+===================================================================== */
+function toggleTask(idx){
+  const t = state.todaysTasks[idx];
+  t.done = !t.done;
+  if(t.done){
+    state.xp += 10;
+    state.coins += 2;
+    state.totalTasksCompleted += 1;
+  } else {
+    state.xp = Math.max(0, state.xp-10);
+    state.coins = Math.max(0, state.coins-2);
+    state.totalTasksCompleted = Math.max(0, state.totalTasksCompleted-1);
+  }
+  recalcLevel();
+  const allDone = state.todaysTasks.every(x=>x.done);
+  const anyDone = state.todaysTasks.some(x=>x.done);
+  state.history[todayStr()] = {completed:state.todaysTasks.filter(x=>x.done).length, total:state.todaysTasks.length};
+  saveState();
+  renderHome();
+  checkBadges();
+  if(t.done && allDone){
+    setTimeout(()=>{
+      fireConfetti(110);
+      openModal(`<div class="modal-emoji">🎉</div><h2 class="modal-title">Awesome job, ${escapeHtml(state.name)}!</h2>
+        <p class="modal-sub">You're building an amazing habit. Every task complete today.</p>
+        <button class="btn btn-primary btn-block" onclick="closeModal()">Woohoo!</button>`);
+    }, 150);
+  } else if(t.done){
+    showToast(anyDone ? "Nice work! Every step counts 🐾" : "Great start!");
+  }
+}
+
+/* =====================================================================
+   RENDERING — HOME
+===================================================================== */
+let currentMood = 'idle';
+function computeMood(){
+  const done = state.todaysTasks.filter(t=>t.done).length;
+  const total = state.todaysTasks.length;
+  if(total===0) return 'idle';
+  if(done===total) return 'celebrate';
+  if(done===0) return 'think';
+  return 'wag';
+}
+function currentSpeech(){
+  const done = state.todaysTasks.filter(t=>t.done).length;
+  const total = state.todaysTasks.length;
+  if(total===0) return "Let's set up today's mission!";
+  if(done===total) return "Awesome job! You're building an amazing habit.";
+  if(done===0) return "Ready when you are — even one small task counts today.";
+  return "Nice work! Every step counts. Let's finish the rest today.";
+}
+
+function renderHome(){
+  const bgItem = SHOP_ITEMS.find(i=>i.id===state.equipped.background);
+  const bg = bgItem ? bgItem.value : null;
+  currentMood = computeMood();
+  const done = state.todaysTasks.filter(t=>t.done).length;
+  const total = state.todaysTasks.length;
+  const pct = total? Math.round((done/total)*100) : 0;
+
+  if(!state.dailyQuoteDate || state.dailyQuoteDate !== todayStr()){
+    state.dailyQuoteText = seededQuote(todayStr());
+    state.dailyQuoteDate = todayStr();
+    saveState();
+  }
+
+  const xpIntoLevel = (()=>{ let xp=state.xp, lvl=1; while(xp>=xpForLevel(lvl)){xp-=xpForLevel(lvl);lvl++;} return xp; })();
+  const xpNeeded = xpForLevel(state.level);
+
+  const html = `
+    <div class="topbar">
+      <div>
+        <div class="greet-eyebrow">Welcome back</div>
+        <h1 class="greet-title">${escapeHtml(state.name)}!</h1>
+      </div>
+      <div class="streak-pill">🔥 ${state.streak}</div>
+    </div>
+
+    <div class="yorkie-card" style="${bg?`background:${bg};`:''}">
+      <div class="speech">${currentSpeech()}</div>
+      <div class="yorkie-stage">${yorkieSVG(currentMood)}</div>
+      <div class="quote-line">"${escapeHtml(state.dailyQuoteText)}"</div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;">
+        <b style="font-size:14px;">Today's progress</b>
+        <span class="mono" style="font-size:13px; color:var(--ink-soft);">${done}/${total} done</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" style="width:${pct}%;"></div></div>
+      <div class="stat-row">
+        <div class="stat-box"><div class="n">${state.xp}</div><div class="l">XP</div></div>
+        <div class="stat-box"><div class="n">Lv ${state.level}</div><div class="l">${xpIntoLevel}/${xpNeeded}</div></div>
+        <div class="stat-box"><div class="n">🪙 ${state.coins}</div><div class="l">Coins</div></div>
+      </div>
+    </div>
+
+    <div class="section-title">Today's Mission</div>
+    <div class="task-list">
+      ${state.todaysTasks.map((t,i)=>`
+        <div class="task-item ${t.done?'done':''}">
+          <button class="task-check ${t.done?'checked':''}" aria-label="Toggle task" data-idx="${i}"></button>
+          <div class="task-label">${escapeHtml(t.label)}</div>
+          <div class="task-xp">+10 XP</div>
+        </div>`).join('')}
+    </div>
+
+    <div class="pawtrail-wrap">
+      ${renderPawTrail()}
+    </div>
+  `;
+  const el = document.getElementById('screenHome');
+  el.innerHTML = html;
+  el.querySelectorAll('.task-check').forEach(btn=>{
+    btn.addEventListener('click', ()=> toggleTask(parseInt(btn.dataset.idx)));
+  });
+}
+
+function renderPawTrail(){
+  const days = milestoneDays();
+  const maxDay = days[days.length-1];
+  const progressPct = Math.min(100, (state.dayCount/maxDay)*100);
+  const meta = CATEGORY_META[state.category] || CATEGORY_META.General;
+  return `
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <b style="font-size:14px;">${meta.emoji} Journey to ${state.goal? escapeHtml(state.goal) : 'your goal'}</b>
+      <span class="mono" style="font-size:12px; color:var(--ink-soft);">Day ${state.dayCount}</span>
+    </div>
+    <div class="pawtrail">
+      <div class="pawtrail-line"></div>
+      <div class="pawtrail-fill" style="width:${progressPct}%;"></div>
+      ${days.map((d,i)=>{
+        const left = 12 + (i/(days.length-1))*(100-2.4*12/1) ;
+        const reached = state.dayCount>=d;
+        const current = !reached && (i===0 || state.dayCount>=days[i-1]);
+        return `<div class="paw-stop ${reached?'reached':''} ${current?'current':''}" style="left:${(i/(days.length-1))*100}%;" title="Day ${d}">${reached?'🐾':d}</div>`;
+      }).join('')}
+    </div>`;
+}
+
+/* =====================================================================
+   RENDERING — PROGRESS
+===================================================================== */
+function renderProgress(){
+  const goalPct = (()=>{
+    if(state.targetDate){
+      const start = new Date(state.history && Object.keys(state.history)[0] || Date.now());
+      const target = new Date(state.targetDate);
+      const now = new Date();
+      const totalSpan = Math.max(1, (target-start));
+      const elapsed = Math.max(0, (now-start));
+      return Math.max(0, Math.min(100, Math.round((elapsed/totalSpan)*100)));
+    }
+    return Math.min(100, Math.round((state.dayCount/90)*100));
+  })();
+
+  const cal = renderCalendar();
+  const week = renderWeekBars();
+  const badges = BADGES.map(b=>{
+    const owned = state.ownedBadges.includes(b.id);
+    return `<div class="badge-tile ${owned?'':'locked'}">${b.emoji}<span class="bname">${b.name}</span></div>`;
+  }).join('');
+
+  document.getElementById('screenProgress').innerHTML = `
+    <div class="topbar"><div><div class="greet-eyebrow">Your journey</div><h1 class="greet-title">Progress</h1></div></div>
+
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;">
+        <b style="font-size:14px;">Overall goal progress</b><span class="mono" style="font-size:13px;">${goalPct}%</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" style="width:${goalPct}%;"></div></div>
+      <div class="stat-row">
+        <div class="stat-box"><div class="n">${state.xp}</div><div class="l">Total XP</div></div>
+        <div class="stat-box"><div class="n">Lv ${state.level}</div><div class="l">Level</div></div>
+        <div class="stat-box"><div class="n">${state.streak}</div><div class="l">Streak</div></div>
+        <div class="stat-box"><div class="n">${state.milestonesReached}</div><div class="l">Milestones</div></div>
+      </div>
+    </div>
+
+    <div class="section-title">Weekly Summary</div>
+    <div class="card">${week}</div>
+
+    <div class="section-title">Calendar</div>
+    <div class="card">${cal}</div>
+
+    <div class="section-title">Achievements <span class="mono" style="font-size:12px; color:var(--ink-soft); font-weight:400;">${state.ownedBadges.length}/${BADGES.length}</span></div>
+    <div class="badge-grid" style="margin-bottom:34px;">${badges}</div>
+
+    <div style="margin:20px 20px 40px;">
+      <button class="btn btn-ghost btn-block btn-sm" id="devNextDay">🔧 Preview Tomorrow (testing)</button>
+      <div style="height:8px;"></div>
+      <button class="btn btn-ghost btn-block btn-sm" id="resetBtn">Reset all data</button>
+    </div>
+  `;
+  document.getElementById('resetBtn').addEventListener('click', ()=>{
+    openModal(`<div class="modal-emoji">😢</div><h2 class="modal-title">Reset everything?</h2>
+      <p class="modal-sub">This clears your goal, progress, and rewards. GoalPup starts fresh.</p>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-ghost" style="flex:1;" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" style="flex:1;" id="confirmReset">Reset</button>
+      </div>`);
+    document.getElementById('confirmReset').addEventListener('click', ()=>{
+      localStorage.removeItem(STORAGE_KEY);
+      location.reload();
+    });
+  });
+  document.getElementById('devNextDay').addEventListener('click', ()=>{
+    state.lastActiveDate = todayStr(new Date(Date.now()-86400000));
+    saveState();
+    checkNewDay();
+    renderAll();
+    showToast("Advanced to a new day 🐾");
+  });
+}
+
+function renderCalendar(){
+  const now = new Date();
+  const year = now.getFullYear(), month = now.getMonth();
+  const first = new Date(year, month, 1);
+  const startWeekday = first.getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const cells = [];
+  for(let i=0;i<startWeekday;i++) cells.push(`<div class="cal-cell empty-day">·</div>`);
+  for(let d=1; d<=daysInMonth; d++){
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const rec = state.history[dateStr];
+    let cls='';
+    if(rec){ cls = (rec.total>0 && rec.completed===rec.total) ? 'full' : (rec.completed>0 ? 'partial' : ''); }
+    if(dateStr === todayStr()) cls += ' current';
+    cells.push(`<div class="cal-cell ${cls}">${d}</div>`);
+  }
+  return `<div style="font-size:13px; font-weight:700; margin-bottom:4px;">${first.toLocaleString('default',{month:'long'})} ${year}</div><div class="cal-grid">${cells.join('')}</div>`;
+}
+
+function renderWeekBars(){
+  const days = [];
+  for(let i=6;i>=0;i--){
+    const d = new Date(Date.now()-i*86400000);
+    days.push(todayStr(d));
+  }
+  const labels = days.map(d=> new Date(d).toLocaleDateString('default',{weekday:'narrow'}));
+  const bars = days.map((d,i)=>{
+    const rec = state.history[d] || (d===todayStr() ? {completed:state.todaysTasks.filter(t=>t.done).length, total:state.todaysTasks.length} : null);
+    const pct = rec && rec.total ? Math.round((rec.completed/rec.total)*100) : 0;
+    return `<div class="wb-col"><div class="wb-bar" style="height:100%;"><div class="wb-bar-fill" style="height:${pct}%;"></div></div><div class="wb-label">${labels[i]}</div></div>`;
+  }).join('');
+  return `<div class="week-bars">${bars}</div>`;
+}
+
+/* =====================================================================
+   RENDERING — REWARDS / SHOP
+===================================================================== */
+let shopTab = 'hat';
+function renderRewards(){
+  const tabs = [['hat','Hats'],['bandana','Bandanas'],['background','Backgrounds'],['bed','Beds'],['jar','Jars'],['theme','Themes']];
+  const items = SHOP_ITEMS.filter(i=>i.type===shopTab);
+  document.getElementById('screenRewards').innerHTML = `
+    <div class="topbar">
+      <div><div class="greet-eyebrow">Shop</div><h1 class="greet-title">Rewards</h1></div>
+      <div class="streak-pill">🪙 ${state.coins}</div>
+    </div>
+    <div class="yorkie-card" style="padding-bottom:8px;">
+      <div class="yorkie-stage">${yorkieSVG('wag')}</div>
+    </div>
+    <div class="shop-tabs">${tabs.map(([id,label])=>`<button class="shop-tab ${shopTab===id?'active':''}" data-tab="${id}">${label}</button>`).join('')}</div>
+    <div class="shop-grid">
+      ${items.map(item=>{
+        const owned = state.ownedItems.includes(item.id);
+        const equipped = state.equipped[item.type]===item.id;
+        return `<div class="shop-item">
+          <div class="shop-swatch" style="background:${item.value?item.value:(item.color||'var(--cream-2)')};">${item.value?'':item.emoji}</div>
+          <div class="shop-name">${item.name}</div>
+          ${owned
+            ? (equipped ? `<div class="shop-cost">Equipped ✓</div>` : `<button class="btn btn-primary btn-sm" data-equip="${item.id}">Equip</button>`)
+            : `<div class="shop-cost">🪙 ${item.cost}</div><button class="btn btn-gold btn-sm" data-buy="${item.id}" ${state.coins<item.cost?'disabled':''}>Buy</button>`
+          }
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+  document.querySelectorAll('.shop-tab').forEach(btn=>btn.addEventListener('click', ()=>{ shopTab=btn.dataset.tab; renderRewards(); }));
+  document.querySelectorAll('[data-buy]').forEach(btn=>btn.addEventListener('click', ()=>{
+    const item = SHOP_ITEMS.find(i=>i.id===btn.dataset.buy);
+    if(state.coins>=item.cost){
+      state.coins -= item.cost;
+      state.ownedItems.push(item.id);
+      state.equipped[item.type] = item.id;
+      applyTheme();
+      saveState(); renderRewards(); renderHome();
+      showToast(`${item.name} unlocked! 🎉`);
+      fireConfetti(50);
+      checkBadges();
+    }
+  }));
+  document.querySelectorAll('[data-equip]').forEach(btn=>btn.addEventListener('click', ()=>{
+    const item = SHOP_ITEMS.find(i=>i.id===btn.dataset.equip);
+    state.equipped[item.type] = item.id;
+    applyTheme();
+    saveState(); renderRewards(); renderHome();
+  }));
+}
+
+function applyTheme(){
+  const themeId = state.equipped.theme;
+  const root = document.documentElement.style;
+  if(themeId==='theme_ocean'){
+    root.setProperty('--forest', '#2C5170'); root.setProperty('--forest-deep', '#1B3A50'); root.setProperty('--sage-dark', '#5D93A8');
+  } else if(themeId==='theme_gold'){
+    root.setProperty('--forest', '#8A6A2E'); root.setProperty('--forest-deep', '#5C481F'); root.setProperty('--sage-dark', '#C79A4C');
+  } else {
+    root.setProperty('--forest', '#33512F'); root.setProperty('--forest-deep', '#203A20'); root.setProperty('--sage-dark', '#71906D');
+  }
+}
+
+/* =====================================================================
+   NAV / BOOT
+===================================================================== */
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===tab));
+  document.getElementById('screenHome').classList.toggle('hidden', tab!=='home');
+  document.getElementById('screenProgress').classList.toggle('hidden', tab!=='progress');
+  document.getElementById('screenRewards').classList.toggle('hidden', tab!=='rewards');
+  if(tab==='progress') renderProgress();
+  if(tab==='rewards') renderRewards();
+  if(tab==='home') renderHome();
+}
+document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click', ()=>switchTab(btn.dataset.tab)));
+
+function renderAll(){
+  applyTheme();
+  const activeTab = document.querySelector('.tab.active')?.dataset.tab || 'home';
+  switchTab(activeTab);
+  checkBadges();
+}
+
+function boot(){
+  if(state.onboarded){
+    checkNewDay();
+    document.getElementById('onboarding').classList.add('hidden');
+    document.getElementById('mainApp').classList.remove('hidden');
+    renderAll();
+  } else {
+    renderOnboarding();
+  }
+}
+boot();
+
+})();
+</script>
+</body>
+</html>
